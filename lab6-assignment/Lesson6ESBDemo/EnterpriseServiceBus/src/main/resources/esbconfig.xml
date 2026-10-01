@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/integration
+			http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+	<channel id="wharehousechannel"/>
+	<channel id="shippingRoutingChannel"/>
+	<channel id="normalShippingChannel"/>
+	<channel id="nextDayShippingChannel"/>
+	<channel id="orderTypeRoutingChannel"/>
+	<channel id="internationalShippingChannel"/>
+
+	<service-activator input-channel="wharehousechannel"
+					   output-channel="orderTypeRoutingChannel"
+					   ref="warehouseservice"
+					   method="checkStock"/>
+
+	<router input-channel="orderTypeRoutingChannel"
+			expression="payload.orderType">
+		<mapping value="domestic" channel="shippingRoutingChannel"/>
+		<mapping value="international" channel="internationalShippingChannel"/>
+	</router>
+
+	<router input-channel="shippingRoutingChannel"
+			expression="payload.amount > 175 ? 'NEXT_DAY' : 'NORMAL'">
+		<mapping value="NEXT_DAY" channel="nextDayShippingChannel"/>
+		<mapping value="NORMAL" channel="normalShippingChannel"/>
+	</router>
+
+	<service-activator input-channel="normalShippingChannel"
+					   ref="shippingservice"
+					   method="ship"/>
+
+	<service-activator input-channel="nextDayShippingChannel"
+					   ref="nextDayShippingService"
+					   method="ship"/>
+	<service-activator input-channel="internationalShippingChannel"
+					   ref="internationalShippingService"
+					   method="ship"/>
+
+	<beans:bean id="internationalShippingService"
+				class="esb.InternationalShippingActivator"/>
+	<beans:bean id="warehouseservice" class="esb.WarehouseActivator"/>
+	<beans:bean id="shippingservice" class="esb.ShippingActivator"/>
+	<beans:bean id="nextDayShippingService" class="esb.NextDayShippingActivator"/>
+
+	
+</beans:beans>
