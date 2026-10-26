@@ -1,0 +1,38 @@
+services:
+  consul-server-1:
+    image: hashicorp/consul:latest
+    container_name: consul-server-1
+    command: >
+      agent -server -bootstrap-expect=3 -client=0.0.0.0 -ui
+      -retry-join=consul-server-2 -retry-join=consul-server-3
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - consul-net
+
+  consul-server-2:
+    image: hashicorp/consul:latest
+    container_name: consul-server-2
+    command: >
+      agent -server -client=0.0.0.0 -ui
+      -retry-join=consul-server-1 -retry-join=consul-server-3
+    ports:
+      - "8501:8500"
+    networks:
+      - consul-net
+
+  consul-server-3:
+    image: hashicorp/consul:latest
+    container_name: consul-server-3
+    command: >
+      agent -server -client=0.0.0.0 -ui
+      -retry-join=consul-server-1 -retry-join=consul-server-2
+    ports:
+      - "8502:8500"
+    networks:
+      - consul-net
+
+networks:
+  consul-net:
+    driver: bridge

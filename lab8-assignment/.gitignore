@@ -1,0 +1,12 @@
+# Maven build output
+**/target/
+
+# IntelliJ project settings
+**/.idea/
+**/*.iml
+
+# macOS files
+.DS_Store
+
+# Archives
+*.zip

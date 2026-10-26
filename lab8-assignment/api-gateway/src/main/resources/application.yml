@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        enabled: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${random.value}
+
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: product-service-route
+              uri: lb://ProductService
+              predicates:
+                - Path=/product/**
+
+            - id: stock-service-route
+              uri: lb://StockService
+              predicates:
+                - Path=/stock/**

@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: ProductService
+  cloud:
+    consul:
+      host: localhost
+      port: 8501
+      discovery:
+        enabled: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${random.value}
+
+server:
+  port: 8090
